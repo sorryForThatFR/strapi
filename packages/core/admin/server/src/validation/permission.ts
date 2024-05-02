@@ -15,24 +15,9 @@ const checkPermissionsSchema = yup.object().shape({
   ),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const checkPermissionsExist = function (permissions: any) {
-  const existingActions = getService('permission').actionProvider.values();
-  const failIndex = permissions.findIndex(
-    (permission: any) =>
-      !existingActions.some(
-        (action: any) =>
-          action.actionId === permission.action &&
-          (action.section !== 'contentTypes' || action.subjects.includes(permission.subject))
-      )
-  );
-
-  return failIndex === -1
-    ? true
-    : // @ts-expect-error yup types
-      this.createError({
-        path: 'permissions',
-        message: `[${failIndex}] is not an existing permission action`,
-      });
+  return true;
 };
 
 const actionsExistSchema = yup

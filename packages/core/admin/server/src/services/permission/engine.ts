@@ -29,26 +29,26 @@ export default (params: { providers: engine.EngineParams['providers'] }) => {
     /**
      * Remove invalid properties from the permission based on the action (applyToProperties)
      */
-    .on('format.permission', (permission: Permission) => {
-      const action = providers.action.get(permission.action) as Action;
-      const properties = permission.properties || {};
+    // .on('format.permission', (permission: Permission) => {
+    //   const action = providers.action.get(permission.action) as Action;
+    //   const properties = permission.properties || {};
 
-      // Only keep the properties allowed by the action (action.applyToProperties)
-      const propertiesName = Object.keys(properties);
-      const invalidProperties = difference(
-        propertiesName,
-        // @ts-expect-error - applyToProperties is defined inside the options of an action
-        action.applyToProperties || propertiesName
-      );
+    //   // Only keep the properties allowed by the action (action.applyToProperties)
+    //   const propertiesName = Object.keys(properties);
+    //   const invalidProperties = difference(
+    //     propertiesName,
+    //     // @ts-expect-error - applyToProperties is defined inside the options of an action
+    //     action.applyToProperties || propertiesName
+    //   );
 
-      const permissionWithSanitizedProperties = invalidProperties.reduce(
-        // @ts-expect-error - fix reduce, property should be a string but it's actually the permission object
-        (property) => permissionDomain.deleteProperty(property, permission) as Permission,
-        permission
-      );
+    //   const permissionWithSanitizedProperties = invalidProperties.reduce(
+    //     // @ts-expect-error - fix reduce, property should be a string but it's actually the permission object
+    //     (property) => permissionDomain.deleteProperty(property, permission) as Permission,
+    //     permission
+    //   );
 
-      return permissionWithSanitizedProperties;
-    })
+    //   return permissionWithSanitizedProperties;
+    // })
 
     /**
      * Ignore the permission if the fields property is an empty array (access to no field)

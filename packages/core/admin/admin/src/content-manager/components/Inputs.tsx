@@ -5,12 +5,15 @@ import {
   NotAllowedInput,
   useCMEditViewDataManager,
   useLibrary,
+  useFetchClient,
 } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import { useIntl } from 'react-intl';
+import { useQuery } from 'react-query';
 
+import { useAdminRoles } from '../../hooks/useAdminRoles';
 import { useContentTypeLayout } from '../hooks/useContentTypeLayout';
 import { LazyComponentStore } from '../hooks/useLazyComponents';
 import { getFieldName } from '../utils/fields';
@@ -20,6 +23,8 @@ import { BlocksInput } from './BlocksInput/BlocksInput';
 import { InputUID } from './InputUID';
 import { RelationInputDataManager } from './Relations/RelationInputDataManager';
 import { Wysiwyg } from './Wysiwyg/Field';
+import { IconButton } from '@strapi/design-system';
+import { Question } from '@strapi/icons';
 
 const VALIDATIONS_TO_OMIT = [
   'type',
@@ -40,6 +45,8 @@ const VALIDATIONS_TO_OMIT = [
 interface InputProps
   extends Pick<EditLayoutRow, 'fieldSchema' | 'metadatas' | 'queryInfos' | 'size'> {
   componentUid?: string;
+  componentUidTree?: string;
+  fieldId?: string;
   keys: string;
   labelAction?: React.ReactNode;
   customFieldInputs: LazyComponentStore;
@@ -47,6 +54,7 @@ interface InputProps
 
 const Inputs = ({
   componentUid,
+  componentUidTree,
   fieldSchema,
   keys,
   labelAction,
@@ -54,6 +62,7 @@ const Inputs = ({
   queryInfos,
   size,
   customFieldInputs,
+  fieldId,
 }: InputProps) => {
   const {
     createActionAllowedFields,
@@ -65,6 +74,7 @@ const Inputs = ({
     shouldNotRunValidations,
     updateActionAllowedFields,
   } = useCMEditViewDataManager();
+  useAdminRoles;
 
   const { fields } = useLibrary();
   const { formatMessage } = useIntl();
@@ -129,7 +139,11 @@ const Inputs = ({
     }
 
     if (isChildOfDynamicZone) {
-      return allowedFields.includes(fieldName[0]);
+      if (fieldId && allowedFields.includes(fieldId)) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     const isChildOfComponent = fieldName.length > 1;
@@ -151,7 +165,11 @@ const Inputs = ({
     }
 
     if (isChildOfDynamicZone) {
-      return readableFields.includes(fieldName[0]);
+      if (fieldId && readableFields.includes(fieldId)) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     const isChildOfComponent = fieldName.length > 1;
@@ -310,6 +328,59 @@ const Inputs = ({
   );
 };
 
+const InputsWithInfo = (props: InputProps) => {
+  const {
+    keys,
+    // componentUid,
+    componentUidTree,
+    metadatas,
+  } = props;
+  const [isVisible, setIsVisible] = React.useState(false);
+  const { get } = useFetchClient();
+
+  const { isLoading: isLoadingUser, data } = useQuery('user', async () => {
+    const { data } = await get('/admin/users/me');
+
+    return data.data;
+  });
+  const roles = data?.roles || [];
+  const roleNames = roles.map(({ name }) => name);
+
+  const fieldName = React.useMemo(() => {
+    return getFieldName(keys);
+  }, [keys]);
+
+  const fieldId = `${(fieldName?.[0] && fieldName[0] + '.') || ''}${componentUidTree}${
+    (metadatas?.label && '.' + metadatas.label) || ''
+  }`;
+
+  // const [, ...properFieldNameArray] = fieldName ?? [];
+  // const fieldId = [componentUid, ...(fieldName ?? [])].join('.');
+
+  return roleNames.includes('Super Admin') ? (
+    <div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <IconButton onClick={() => setIsVisible((prevState) => !prevState)} icon={<Question />} />
+        {isVisible && (
+          <span
+            style={{
+              backgroundColor: 'black',
+              color: 'white',
+              padding: 6,
+              borderRadius: 10,
+              zIndex: 1,
+            }}
+          >{`fieldId: ${fieldId}`}</span>
+        )}
+      </div>
+
+      <Inputs {...props} fieldId={fieldId} />
+    </div>
+  ) : (
+    <Inputs {...props} fieldId={fieldId} />
+  );
+};
+
 const getStep = (type: string) => {
   switch (type) {
     case 'float':
@@ -363,4 +434,4 @@ const getInputType = (type = '') => {
   }
 };
 
-export { Inputs };
+export { InputsWithInfo as Inputs };

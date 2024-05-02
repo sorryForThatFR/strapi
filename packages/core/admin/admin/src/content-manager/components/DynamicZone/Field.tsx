@@ -1,7 +1,12 @@
 import * as React from 'react';
 
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
-import { NotAllowedInput, useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
+import {
+  NotAllowedInput,
+  useCMEditViewDataManager,
+  useNotification,
+  useRBACProvider,
+} from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -23,6 +28,7 @@ interface DynamicZoneProps extends Pick<EditLayoutRow, 'metadatas'> {
 }
 
 const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneProps) => {
+  const { allPermissions, refetchPermissions } = useRBACProvider();
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity, components = [], required = false } = fieldSchema ?? {};
 
@@ -54,7 +60,13 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneP
     [modifiedData, name]
   );
 
-  const { getComponentLayout, components: allComponents } = useContentTypeLayout();
+  const { getComponentLayout, components: allComponents, contentType } = useContentTypeLayout();
+  const contentTypeUID = contentType?.uid;
+
+  const extraPermissions = allPermissions.find(
+    ({ action, subject }) =>
+      action === 'plugin::content-manager.explorer.extra' && subject === contentTypeUID
+  );
 
   const dynamicComponentsByCategory = React.useMemo(() => {
     return components.reduce<NonNullable<DynamicComponentProps['dynamicComponentsByCategory']>>(
@@ -272,6 +284,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneP
                 onGrabItem={handleGrabItem}
                 onAddComponent={handleAddComponent}
                 dynamicComponentsByCategory={dynamicComponentsByCategory}
+                extraPermissions={extraPermissions}
               />
             ))}
           </ol>

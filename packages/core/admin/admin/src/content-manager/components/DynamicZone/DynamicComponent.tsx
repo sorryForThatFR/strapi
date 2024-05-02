@@ -38,6 +38,7 @@ interface DynamicComponentProps
   onAddComponent?: (componentUid: string, index: number) => void;
   onRemoveComponentClick: () => void;
   onMoveComponent: (dragIndex: number, hoverIndex: number) => void;
+  extraPermissions: any;
 }
 
 const DynamicComponent = ({
@@ -53,11 +54,13 @@ const DynamicComponent = ({
   onCancel,
   dynamicComponentsByCategory = {},
   onAddComponent,
+  extraPermissions,
 }: DynamicComponentProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
   const { formatMessage } = useIntl();
   const { getComponentLayout } = useContentTypeLayout();
   const { modifiedData } = useCMEditViewDataManager();
+  const isDragAllowed = !extraPermissions?.properties?.drag?.includes(name);
   const { icon, friendlyName, mainValue } = React.useMemo(() => {
     const componentLayoutData = getComponentLayout(componentUid);
 
@@ -135,22 +138,24 @@ const DynamicComponent = ({
       >
         <Trash />
       </IconButtonCustom>
-      <IconButton
-        forwardedAs="div"
-        role="button"
-        noBorder
-        tabIndex={0}
-        onClick={(e) => e.stopPropagation()}
-        data-handler-id={handlerId}
-        ref={dragRef}
-        label={formatMessage({
-          id: getTranslation('components.DragHandle-label'),
-          defaultMessage: 'Drag',
-        })}
-        onKeyDown={handleKeyDown}
-      >
-        <Drag />
-      </IconButton>
+      {isDragAllowed && (
+        <IconButton
+          forwardedAs="div"
+          role="button"
+          noBorder
+          tabIndex={0}
+          onClick={(e) => e.stopPropagation()}
+          data-handler-id={handlerId}
+          ref={dragRef}
+          label={formatMessage({
+            id: getTranslation('components.DragHandle-label'),
+            defaultMessage: 'Drag',
+          })}
+          onKeyDown={handleKeyDown}
+        >
+          <Drag />
+        </IconButton>
+      )}
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
           <More aria-hidden focusable={false} />
@@ -234,6 +239,7 @@ const DynamicComponent = ({
             <AccordionContent>
               <AccordionContentRadius background="neutral0">
                 <FieldComponent
++                 componentUidTree={componentUid}
                   componentUid={componentUid}
                   name={`${name}.${index}`}
                   isFromDynamicZone

@@ -123,6 +123,22 @@ const buildNode = (model: any, attributeName: string, attribute: any) => {
     return { ...node, children: buildDeepAttributesCollection(component) };
   }
 
+  if (attribute.type === "dynamiczone") {
+    const children = [];
+
+    for (const componentName of attribute.components) {
+      const component = strapi.components[componentName];
+
+      children.push({
+        label: componentName,
+        value: componentName,
+        children: buildDeepAttributesCollection(component),
+      });
+    }
+
+    return { ...node, children };
+  }
+
   return node;
 };
 

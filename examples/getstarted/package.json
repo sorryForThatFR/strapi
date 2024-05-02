@@ -8,6 +8,7 @@
     "build": "strapi build",
     "build:ce": "STRAPI_DISABLE_EE=true strapi build",
     "develop": "strapi develop",
+    "watch": "strapi develop --watch-admin",
     "develop:ce": "STRAPI_DISABLE_EE=true strapi develop",
     "start": "strapi start",
     "strapi": "strapi"

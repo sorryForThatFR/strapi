@@ -21,6 +21,7 @@ import { RepeatableComponent } from './RepeatableComponent';
 
 interface FieldComponentProps {
   componentUid: string;
+  componentUidTree: string;
   intlLabel?: TranslationMessage;
   isFromDynamicZone?: boolean;
   isRepeatable?: boolean;
@@ -34,6 +35,7 @@ interface FieldComponentProps {
 
 const FieldComponent = ({
   componentUid,
+  componentUidTree,
   intlLabel,
   isFromDynamicZone,
   isRepeatable,
@@ -198,6 +200,8 @@ const FieldComponent = ({
         )}
         {!isRepeatable && isInitialized && (
           <NonRepeatableComponent
+            componentUidTree={componentUidTree}
+            intlLabel={intlLabel}
             componentUid={componentUid}
             isFromDynamicZone={isFromDynamicZone}
             isNested={isNested}
@@ -206,6 +210,8 @@ const FieldComponent = ({
         )}
         {isRepeatable && (
           <RepeatableComponent
+            componentUidTree={componentUidTree}
+            intlLabel={intlLabel}
             componentValue={componentValue ?? undefined}
             componentValueLength={componentValueLength}
             componentUid={componentUid}

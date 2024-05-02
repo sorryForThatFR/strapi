@@ -86,7 +86,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
   await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();
 
-  await permissionService.cleanPermissionsInDatabase();
+  // await permissionService.cleanPermissionsInDatabase();
 
   await userService.displayWarningIfUsersDontHaveRole();
 

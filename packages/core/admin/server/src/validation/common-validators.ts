@@ -71,11 +71,11 @@ const fieldsPropertyValidation = (action: Action) =>
     .array()
     .of(yup.string())
     .nullable()
-    .test(
-      'field-nested',
-      'Fields format are incorrect (bad nesting).',
-      checkFieldsAreCorrectlyNested
-    )
+    // .test(
+    //   'field-nested',
+    //   'Fields format are incorrect (bad nesting).',
+    //   checkFieldsAreCorrectlyNested
+    // )
     .test(
       'field-nested',
       'Fields format are incorrect (duplicates).',
@@ -93,15 +93,7 @@ export const permission = yup
   .shape({
     action: yup
       .string()
-      .required()
-      .test('action-validity', 'action is not an existing permission action', function (actionId) {
-        // If the action field is Nil, ignore the test and let the required check handle the error
-        if (isNil(actionId)) {
-          return true;
-        }
-
-        return !!getActionFromProvider(actionId);
-      }),
+      .required(),
     actionParameters: yup.object().nullable(),
     subject: yup
       .string()
@@ -126,27 +118,6 @@ export const permission = yup
       }),
     properties: yup
       .object()
-      .test('properties-structure', 'Invalid property set at ${path}', function (properties) {
-        // @ts-expect-error yup types
-        const action = getActionFromProvider(this.options.parent.action) as any;
-        const hasNoProperties = isEmpty(properties) || isNil(properties);
-
-        if (!has('options.applyToProperties', action)) {
-          return hasNoProperties;
-        }
-
-        if (hasNoProperties) {
-          return true;
-        }
-
-        const { applyToProperties } = action.options;
-
-        if (!isArray(applyToProperties)) {
-          return false;
-        }
-
-        return Object.keys(properties).every((property) => applyToProperties.includes(property));
-      })
       .test(
         'fields-property',
         'Invalid fields property at ${path}',

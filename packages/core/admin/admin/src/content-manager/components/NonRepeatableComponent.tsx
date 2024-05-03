@@ -8,21 +8,31 @@ import { Inputs } from './Inputs';
 
 interface NonRepeatableComponentProps {
   componentUid: string;
+  componentUidTree: string;
   isFromDynamicZone?: boolean;
   isNested?: boolean;
   name: string;
+  intlLabel: any;
 }
 
 const NonRepeatableComponent = ({
   componentUid,
+  componentUidTree,
   isFromDynamicZone,
   isNested,
   name,
+  intlLabel,
 }: NonRepeatableComponentProps) => {
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = getComponentLayout(componentUid);
 
   const fields = componentLayoutData.layouts.edit;
+  let newComponentUidTree = componentUidTree ?? componentUid;
+  if (intlLabel?.id && componentUid) {
+    if (componentUidTree?.includes?.(componentUid)) {
+      newComponentUidTree = componentUidTree.replace(componentUid, intlLabel.id);
+    }
+  }
 
   const { lazyComponentStore } = useLazyComponents();
 
@@ -51,6 +61,7 @@ const NonRepeatableComponent = ({
                     <GridItem col={size} s={12} xs={12} key={fieldName}>
                       <FieldComponent
                         componentUid={compoUid}
+                        componentUidTree={`${newComponentUidTree}.${metadatas.label}`}
                         intlLabel={{
                           id: metadatas.label,
                           defaultMessage: metadatas.label,
@@ -70,6 +81,7 @@ const NonRepeatableComponent = ({
                   <GridItem col={size} key={fieldName} s={12} xs={12}>
                     <Inputs
                       componentUid={componentUid}
+                      componentUidTree={newComponentUidTree}
                       keys={keys}
                       fieldSchema={fieldSchema}
                       metadatas={metadatas}

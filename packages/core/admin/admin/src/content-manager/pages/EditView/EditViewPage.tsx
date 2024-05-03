@@ -237,6 +237,7 @@ const EditViewPage = ({
                                           <GridItem col={size} s={12} xs={12} key={component}>
                                             <FieldComponent
                                               componentUid={component}
+                                              componentUidTree={component}
                                               isRepeatable={repeatable}
                                               intlLabel={{
                                                 id: metadatas.label,

@@ -444,7 +444,12 @@ const reducer = (state: State, action: Action) =>
         const oldValues = get(nextModifiedDataState, pathToValue, {});
 
         const updatedValues = updateValues(oldValues, value);
-        set(nextModifiedDataState, pathToValue, updatedValues);
+
+        if (pathToValue.includes('plugin::content-manager.explorer.extra')) {
+          set(nextModifiedDataState, pathToValue, value);
+        } else {
+          set(nextModifiedDataState, pathToValue, updatedValues);
+        }
 
         // When we uncheck a parent checkbox we need to remove the associated conditions
         if (!value) {

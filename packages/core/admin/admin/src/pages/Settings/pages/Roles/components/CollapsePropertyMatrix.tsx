@@ -5,8 +5,10 @@ import { CarretDown } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import styled, { DefaultTheme, css } from 'styled-components';
+import { useRouteMatch } from 'react-router-dom';
 
 import { Action, SubjectProperty } from '../../../../../../../shared/contracts/permissions';
+import { useAdminRolePermissions } from '../../../../../hooks/useAdminRolePermissions';
 import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
@@ -46,6 +48,15 @@ const CollapsePropertyMatrix = ({
   pathToData,
   propertyName,
 }: CollapsePropertyMatrixProps) => {
+  const recursiveChildren = useMemo(() => {
+    if (!Array.isArray(childrenForm)) {
+      return [];
+    }
+
+    return childrenForm;
+  }, [childrenForm]);
+
+  const isCollapsable = recursiveChildren.length > 0;
   const propertyActions = useMemo(
     () =>
       availableActions.map((action) => {
@@ -59,9 +70,25 @@ const CollapsePropertyMatrix = ({
     [availableActions, propertyName]
   );
 
+  const propertyActionsForHeaders = [...propertyActions];
+
+  if (isCollapsable) {
+    if (
+      !propertyActionsForHeaders.find(
+        ({ actionId }) => actionId === 'plugin::content-manager.explorer.extra'
+      )
+    ) {
+      propertyActionsForHeaders.push({
+        actionId: 'plugin::content-manager.explorer.extra',
+        isActionRelatedToCurrentProperty: true,
+        label: 'Drag',
+      });
+    }
+  }
+
   return (
     <Flex display="inline-flex" direction="column" minWidth={0}>
-      <Header label={label} headers={propertyActions} />
+      <Header label={label} headers={propertyActionsForHeaders} />
       <Box>
         {childrenForm.map(({ children: childrenForm, label, value, required }, i) => (
           <ActionRow
@@ -105,7 +132,7 @@ const ActionRow = ({
   name,
   required = false,
   pathToData,
-  propertyActions,
+  propertyActions: propsPropertyActions,
   propertyName,
   isOdd = false,
 }: ActionRowProps) => {
@@ -117,6 +144,17 @@ const ActionRow = ({
     onChangeParentCheckbox,
     onChangeSimpleCheckbox,
   } = usePermissionsDataManager();
+
+  const propertyActions = [...propsPropertyActions];
+  const {
+    params: { id },
+  } = useRouteMatch('/settings/roles/:id') as any;
+  const { permissions, isLoading: isLoadingPermissions } = useAdminRolePermissions(
+    { id },
+    {
+      cacheTime: 0,
+    }
+  );
 
   const isActive = rowToOpen === name;
 
@@ -152,6 +190,18 @@ const ActionRow = ({
     return getRowLabelCheckboxState(propertyActions, modifiedData, pathToData, propertyName, name);
   }, [propertyActions, modifiedData, pathToData, propertyName, name]);
 
+  if (isCollapsable) {
+    if (
+      !propertyActions.find(({ actionId }) => actionId === 'plugin::content-manager.explorer.extra')
+    ) {
+      propertyActions.push({
+        actionId: 'plugin::content-manager.explorer.extra',
+        isActionRelatedToCurrentProperty: true,
+        label: 'Drag',
+      });
+    }
+  }
+
   return (
     <>
       <Wrapper
@@ -180,13 +230,19 @@ const ActionRow = ({
                 return <HiddenAction key={label} />;
               }
 
-              const checkboxName = [
+              let checkboxName = [
                 ...pathToData.split('..'),
                 actionId,
                 'properties',
                 propertyName,
                 name,
               ];
+
+              if (actionId === 'plugin::content-manager.explorer.extra') {
+                if (label === 'Drag') {
+                  checkboxName = [...pathToData.split('..'), actionId, 'properties', 'drag', name];
+                }
+              }
 
               if (!isCollapsable) {
                 const checkboxValue = get(modifiedData, checkboxName, false);
@@ -226,7 +282,36 @@ const ActionRow = ({
 
               const data = get(modifiedData, checkboxName, {});
 
-              const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
+              const checkboxState = getCheckboxState(data);
+              let { hasAllActionsSelected } = checkboxState;
+              const { hasSomeActionsSelected } = checkboxState;
+              const isExtraAction = actionId === 'plugin::content-manager.explorer.extra';
+
+              if (isExtraAction) {
+                const neededSubject = pathToData.split('..')[1];
+
+                let defaultValue = false;
+
+                try {
+                  if (neededSubject) {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    //@ts-ignore
+                    const neededPermission = permissions?.find(({ action, subject }) => {
+                      return action === actionId && subject === neededSubject;
+                    });
+
+                    if (neededPermission) {
+                      defaultValue = neededPermission.properties[
+                        checkboxName[checkboxName.length - 2]
+                      ].includes(checkboxName[checkboxName.length - 1]);
+                    }
+                  }
+                } catch (err) {
+                  console.error(err);
+                }
+
+                hasAllActionsSelected = !get(modifiedData, checkboxName, defaultValue);
+              }
 
               return (
                 <Flex
@@ -244,7 +329,7 @@ const ActionRow = ({
                       onChangeParentCheckbox({
                         target: {
                           name: checkboxName.join('..'),
-                          value,
+                          value: isExtraAction ? !value : value,
                         },
                       });
                     }}
@@ -271,7 +356,7 @@ const ActionRow = ({
           parentName={name}
           pathToDataFromActionRow={pathToData}
           propertyName={propertyName}
-          propertyActions={propertyActions}
+          propertyActions={propsPropertyActions}
           recursiveLevel={0}
         />
       )}
@@ -425,9 +510,9 @@ const SubActionRow = ({
                       tabIndex: 0,
                       role: 'button',
                     })}
-                    title={label}
+                    title={label.split('.').join(' ')}
                   >
-                    <Typography ellipsis>{capitalise(label)}</Typography>
+                    <Typography ellipsis>{capitalise(label.split('.').join(' '))}</Typography>
                     {required && <RequiredSign />}
                     <CarretIcon $isActive={isActive} />
                   </CollapseLabel>

@@ -65,6 +65,32 @@ const getNestedFields = (
         return fields;
       }
 
+      if (attr.type === 'dynamiczone') {
+        let dynamicZoneFields: string[] = [];
+
+        for (const componentName of attr.components) {
+          const compoFields = getNestedFields(components[componentName], {
+            nestingLevel: nestingLevel - 1,
+            prefix: `${fieldPath}.${componentName}`,
+            components,
+            requiredOnly,
+            existingFields,
+          });
+
+          if (compoFields.length === 0 && shouldBeIncluded) {
+            dynamicZoneFields = dynamicZoneFields.concat(fieldPath);
+          }
+
+          if (!fields.includes(key) && !dynamicZoneFields.includes(key)) {
+            dynamicZoneFields.push(key);
+          }
+
+          dynamicZoneFields = dynamicZoneFields.concat(compoFields);
+        }
+
+        return fields.concat(dynamicZoneFields);
+      }
+
       if (shouldBeIncluded) {
         return fields.concat(fieldPath);
       }

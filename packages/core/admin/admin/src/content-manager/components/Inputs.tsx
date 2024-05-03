@@ -54,7 +54,6 @@ interface InputProps
 
 const Inputs = ({
   componentUid,
-  componentUidTree,
   fieldSchema,
   keys,
   labelAction,
@@ -329,22 +328,17 @@ const Inputs = ({
 };
 
 const InputsWithInfo = (props: InputProps) => {
-  const {
-    keys,
-    // componentUid,
-    componentUidTree,
-    metadatas,
-  } = props;
+  const { keys, componentUidTree, metadatas } = props;
   const [isVisible, setIsVisible] = React.useState(false);
   const { get } = useFetchClient();
 
-  const { isLoading: isLoadingUser, data } = useQuery('user', async () => {
+  const { data } = useQuery('user', async () => {
     const { data } = await get('/admin/users/me');
 
     return data.data;
   });
   const roles = data?.roles || [];
-  const roleNames = roles.map(({ name }) => name);
+  const roleNames = roles.map(({ name }: { name: string }) => name);
 
   const fieldName = React.useMemo(() => {
     return getFieldName(keys);
@@ -353,9 +347,6 @@ const InputsWithInfo = (props: InputProps) => {
   const fieldId = `${(fieldName?.[0] && fieldName[0] + '.') || ''}${componentUidTree}${
     (metadatas?.label && '.' + metadatas.label) || ''
   }`;
-
-  // const [, ...properFieldNameArray] = fieldName ?? [];
-  // const fieldId = [componentUid, ...(fieldName ?? [])].join('.');
 
   return roleNames.includes('Super Admin') ? (
     <div>

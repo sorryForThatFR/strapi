@@ -239,7 +239,7 @@ const DynamicComponent = ({
             <AccordionContent>
               <AccordionContentRadius background="neutral0">
                 <FieldComponent
-+                 componentUidTree={componentUid}
+                  componentUidTree={componentUid}
                   componentUid={componentUid}
                   name={`${name}.${index}`}
                   isFromDynamicZone

@@ -8,6 +8,7 @@ const generatePermissionsObject = (uid: string) => {
     publish: [{ action: 'plugin::content-manager.explorer.publish', subject: null }],
     read: [{ action: 'plugin::content-manager.explorer.read', subject: null }],
     update: [{ action: 'plugin::content-manager.explorer.update', subject: null }],
+    extra: [{ action: 'plugin::content-manager.explorer.extra', subject: null }],
   } satisfies Record<string, Permission[]>;
 
   return Object.entries(permissions).reduce<Record<string, Permission[]>>((acc, [key, value]) => {

@@ -47,22 +47,26 @@ import type { EditLayoutRow } from '../utils/layouts';
 
 interface RepeatableComponentProps {
   componentUid: string;
+  componentUidTree: string;
   componentValue?: Array<{ __temp_key__: number }>;
   componentValueLength?: number;
   isReadOnly?: boolean;
   max?: number;
   min?: number;
   name: string;
+  intlLabel: any;
 }
 
 const RepeatableComponent = ({
   componentUid,
+  componentUidTree,
   componentValue = [],
   componentValueLength = 0,
   isReadOnly,
   max = Infinity,
   min = -Infinity,
   name,
+  intlLabel,
 }: RepeatableComponentProps) => {
   const { addRepeatableComponentToField, formErrors, moveComponentField } =
     useCMEditViewDataManager();
@@ -72,6 +76,7 @@ const RepeatableComponent = ({
   const [liveText, setLiveText] = React.useState('');
   const { getComponentLayout, components } = useContentTypeLayout();
   const componentLayoutData = getComponentLayout(componentUid);
+  let newComponentUidTree = componentUidTree ?? componentUid;
 
   const search = useQuery();
 
@@ -255,6 +260,7 @@ const RepeatableComponent = ({
             <Component
               componentFieldName={`${name}.${index}`}
               componentUid={componentUid}
+              componentUidTree={newComponentUidTree}
               fields={componentLayoutData.layouts.edit}
               key={key}
               index={index}
@@ -413,6 +419,7 @@ interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'> {
   componentFieldName: string;
   componentUid: string;
+  componentUidTree: string;
   fields?: EditLayoutRow[][];
   index: number;
   isOpen?: boolean;
@@ -426,6 +433,7 @@ interface ComponentProps
 const Component = ({
   componentFieldName,
   componentUid,
+  componentUidTree,
   fields = [],
   index,
   isOpen,
@@ -548,12 +556,13 @@ const Component = ({
                       const keys = `${componentFieldName}.${name}`;
 
                       if (isComponent) {
-                        const componentUid = fieldSchema.component;
+                        const componentUidNew = fieldSchema.component;
 
                         return (
                           <GridItem col={size} s={12} xs={12} key={name}>
                             <FieldComponent
-                              componentUid={componentUid}
+                              componentUid={componentUidNew}
+                              componentUidTree={`${componentUidTree}.${metadatas.label}`}
                               intlLabel={{
                                 id: metadatas.label,
                                 defaultMessage: metadatas.label,
@@ -572,6 +581,7 @@ const Component = ({
                       return (
                         <GridItem key={keys} col={size} s={12} xs={12}>
                           <Inputs
+                            componentUidTree={componentUidTree}
                             componentUid={componentUid}
                             fieldSchema={fieldSchema}
                             keys={keys}

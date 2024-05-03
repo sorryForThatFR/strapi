@@ -93,26 +93,46 @@ const formatContentTypesPermissions = (contentTypesPermissions: Form): Permissio
           }
 
           if (!permissions?.properties?.enabled) {
-            const createdPermissionsArray = Object.entries(permissions.properties).reduce<
-              PermissionApiBody[number]
-            >(
-              (acc, current) => {
-                const [propertyName, propertyValue] = current;
+            try {
+              const createdPermissionsArray = Object.entries(permissions.properties).reduce<
+                PermissionApiBody[number]
+              >(
+                (acc, current) => {
+                  const [propertyName, propertyValue] = current;
 
-                // @ts-expect-error – `propertyValue` can be boolean or an object, but we don't account for it...
-                acc.properties[propertyName] = createPropertyArray(propertyValue);
+                  // @ts-expect-error – `propertyValue` can be boolean or an object, but we don't account for it...
+                  const createdArray = createPropertyArray(propertyValue);
+                  const newArr = [...createdArray];
+                  for (const i of createdArray) {
+                    const partsArr = i.split('.');
 
-                return acc;
-              },
-              {
-                action: actionName,
-                subject,
-                conditions: createConditionsArray(permissions.conditions),
-                properties: {},
-              }
-            );
+                    while (partsArr.length > 1) {
+                      partsArr.pop();
+                      const formattedValue = partsArr.join('.');
 
-            return [...acc, createdPermissionsArray];
+                      if (formattedValue && !newArr.includes(formattedValue)) {
+                        newArr.push(formattedValue);
+                      }
+                    }
+                  }
+
+                  acc.properties[propertyName] = Array.from(new Set(newArr));
+
+                  return acc;
+                },
+                {
+                  action: actionName,
+                  subject,
+                  conditions: createConditionsArray(permissions.conditions ?? {}),
+                  properties: {},
+                }
+              );
+
+              return [...acc, createdPermissionsArray];
+            } catch (err) {
+              console.error(err);
+              throw err;
+            }
           }
 
           if (!permissions.properties.enabled) {

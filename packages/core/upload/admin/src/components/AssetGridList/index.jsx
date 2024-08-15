@@ -35,6 +35,7 @@ export const AssetGridList = ({
             return (
               <GridItem key={asset.id} col={3} height="100%">
                 <Draggable index={index} moveItem={onReorderAsset} id={asset.id}>
+                  <ConsoleLogger log={{ l: "asset", asset }} />
                   <AssetCard
                     allowedTypes={allowedTypes}
                     asset={asset}
@@ -65,6 +66,11 @@ export const AssetGridList = ({
       </Grid>
     </KeyboardNavigable>
   );
+};
+
+const ConsoleLogger = (log) => {
+  console.log(log);
+  return null;
 };
 
 AssetGridList.defaultProps = {

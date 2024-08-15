@@ -18,6 +18,7 @@ import getTrad from '../../../utils/getTrad';
 
 import { FromComputerForm } from './FromComputerForm';
 import { FromUrlForm } from './FromUrlForm';
+import { FromBrandfolder } from './FromBrandfolder';
 
 export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
   const { formatMessage } = useIntl();
@@ -54,6 +55,9 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
                 defaultMessage: 'From URL',
               })}
             </Tab>
+            <Tab>
+              Brandfolder
+            </Tab>
           </Tabs>
 
           <Divider />
@@ -68,6 +72,13 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
           </TabPanel>
           <TabPanel>
             <FromUrlForm
+              onClose={onClose}
+              onAddAsset={onAddAsset}
+              trackedLocation={trackedLocation}
+            />
+          </TabPanel>
+          <TabPanel>
+            <FromBrandfolder
               onClose={onClose}
               onAddAsset={onAddAsset}
               trackedLocation={trackedLocation}

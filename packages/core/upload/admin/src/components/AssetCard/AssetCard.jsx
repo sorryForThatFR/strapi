@@ -29,6 +29,13 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size,
     size,
   };
 
+  let thumbnail;
+  if (asset.provider === 'brandfolder') {
+    thumbnail = asset.url;
+  } else {
+    thumbnail = prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url);
+  }
+
   if (asset.mime.includes(AssetType.Video)) {
     return <VideoAssetCard {...commonAssetCardProps} />;
   }
@@ -39,7 +46,7 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size,
         {...commonAssetCardProps}
         alt={asset.alternativeText || asset.name}
         height={asset.height}
-        thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
+        thumbnail={thumbnail}
         width={asset.width}
         updatedAt={asset.updatedAt}
         isUrlSigned={asset?.isUrlSigned || false}

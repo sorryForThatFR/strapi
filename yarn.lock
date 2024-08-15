@@ -8537,6 +8537,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.4.3"
     axios: "npm:1.6.0"
     byte-size: "npm:7.0.1"
+    classnames: "npm:2.5.1"
     cropperjs: "npm:1.6.0"
     date-fns: "npm:2.30.0"
     formik: "npm:2.4.0"
@@ -13386,6 +13387,13 @@ __metadata:
     isobject: "npm:^3.0.0"
     static-extend: "npm:^0.1.1"
   checksum: b236d9deb6594828966e45c5f48abac9a77453ee0dbdb89c635ce876f59755d7952309d554852b6f7d909198256c335a4bd51b09c1d238b36b92152eb2b9d47a
+  languageName: node
+  linkType: hard
+
+"classnames@npm:2.5.1":
+  version: 2.5.1
+  resolution: "classnames@npm:2.5.1"
+  checksum: 58eb394e8817021b153bb6e7d782cfb667e4ab390cb2e9dac2fc7c6b979d1cc2b2a733093955fc5c94aa79ef5c8c89f11ab77780894509be6afbb91dddd79d15
   languageName: node
   linkType: hard
 

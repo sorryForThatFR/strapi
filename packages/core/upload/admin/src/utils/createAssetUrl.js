@@ -8,11 +8,11 @@ import { prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
  * @return {String} URL
  */
 const createAssetUrl = (asset, forThumbnail = true) => {
-  if (asset.isLocal) {
+  if (asset.isLocal || asset.provider === 'brandfolder') {
     return asset.url;
   }
 
-  const assetUrl = forThumbnail ? asset?.formats?.thumbnail?.url || asset.url : asset.url;
+  let assetUrl = forThumbnail ? asset?.formats?.thumbnail?.url || asset.url : asset.url;
 
   return prefixFileUrlWithBackendUrl(assetUrl);
 };
